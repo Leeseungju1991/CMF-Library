@@ -258,6 +258,7 @@ export default function Dashboard() {
               className="text-xs underline text-slate-500 hover:text-slate-700"
               onClick={() => navigate("/search")}
             >
+              검색으로 이동
             </button>
           </div>
 
@@ -274,8 +275,7 @@ export default function Dashboard() {
                 />
               ))
             ) : (
-              
-			  <div className="text-sm text-slate-500"></div>
+              <div className="text-sm text-slate-500">집계된 검색 기록이 없습니다.</div>
             )}
           </div>
         </div>
@@ -287,15 +287,15 @@ export default function Dashboard() {
             {recent?.length ? (
               recent.slice(0, 5).map((x: any, i: number) => (
                 <InfoLine
-                  key={x?.itemId ?? i}
-                  itemId={x?.itemId ?? ""}
+                  key={x?.id ?? x?.itemId ?? i}
+                  itemId={x?.id ?? x?.itemId ?? ""}
                   company={x?.업체명 ?? "-"}
                   weight={x?.무게 ?? "-"}
                   width={x?.width ?? "-"}
                 />
               ))
             ) : (
-              <div className="text-sm text-slate-500"></div>
+              <div className="text-sm text-slate-500">최근 추가된 항목이 없습니다.</div>
             )}
           </div>
         </div>

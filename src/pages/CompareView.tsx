@@ -46,7 +46,7 @@ export default function CompareViewPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="text-2xl font-semibold"></div>
+        <div className="text-2xl font-semibold">색상 비교 ({items.length})</div>
         <button className="btn-outline" onClick={() => navigate(-1)}>
           뒤로
         </button>
@@ -114,21 +114,21 @@ function CompareItemCard(props: { it: CmfItem; onDetail: () => void }) {
         </div>
 
         <div className="flex justify-end">
-           <button
-    type="button"
-    onClick={onDetail} type="button"
-    className={[
-   "h-9 min-w-[80px] px-5",
-      "rounded-full",
-      "text-sm font-semibold text-white",
-      "bg-gradient-to-r from-purple-300 to-pink-300",
-      "shadow-sm",
-      "hover:brightness-105 active:scale-[0.99]",
-      "transition",
-    ].join(" ")}
-  >
-    상세
-  </button>
+          <button
+            type="button"
+            onClick={onDetail}
+            className={[
+              "h-9 min-w-[80px] px-5",
+              "rounded-full",
+              "text-sm font-semibold text-white",
+              "bg-gradient-to-r from-purple-300 to-pink-300",
+              "shadow-sm",
+              "hover:brightness-105 active:scale-[0.99]",
+              "transition",
+            ].join(" ")}
+          >
+            상세
+          </button>
         </div>
       </div>
     </div>

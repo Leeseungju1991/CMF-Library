@@ -553,7 +553,7 @@ export default function DetailPage() {
                 <button
                   type="button"
                   onClick={onSaveOutfitPhotos}
-                  disabled={savingPhotos}
+                  disabled={savingPhotos || pendingFiles.length === 0}
                   className="
                     px-4 py-2 rounded-2xl text-white font-medium
                     bg-gradient-to-r from-purple-500 to-violet-600
@@ -565,12 +565,82 @@ export default function DetailPage() {
                 </button>
 
                 <button type="button" className="btn-outline text-sm" onClick={() => removeSection("outfitPhotos")}>
-                  삭제
+                  닫기
                 </button>
               </div>
             </div>
 
-            <div className="text-sm text-muted">사진 기능 코드는 기존 그대로 사용하시면 됩니다.</div>
+            {(form.제작된의상사진?.length ?? 0) > 0 && (
+              <>
+                <div className="text-xs text-muted mb-2">저장된 사진 ({form.제작된의상사진.length})</div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-5">
+                  {form.제작된의상사진.map((p, idx) => (
+                    <div key={(p as any).url ?? idx} className="glass-card overflow-hidden">
+                      <button
+                        type="button"
+                        className="block w-full"
+                        onClick={() => setZoomUrl((p as any).url)}
+                        title="크게 보기"
+                      >
+                        <div className="aspect-square bg-white/40">
+                          <img
+                            src={(p as any).url}
+                            alt={(p as any).name || `outfit-${idx + 1}`}
+                            loading="lazy"
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      </button>
+                      <div className="p-2 flex items-center justify-between gap-2">
+                        <div className="text-xs text-slate-600 truncate">{(p as any).name || "photo"}</div>
+                        <button
+                          type="button"
+                          className="text-xs px-2 py-1 rounded-xl bg-white/70 border border-white/70"
+                          onClick={() => removeSavedPhoto(idx)}
+                        >
+                          제거
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {pendingFiles.length === 0 ? (
+              (form.제작된의상사진?.length ?? 0) === 0 ? (
+                <div className="text-sm text-muted">추가된 사진이 없습니다.</div>
+              ) : null
+            ) : (
+              <>
+                <div className="text-xs text-muted mb-2">저장 대기 ({pendingFiles.length})</div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                  {pendingPreviews.map((url, idx) => (
+                    <div key={url} className="glass-card overflow-hidden">
+                      <div className="aspect-square bg-white/40">
+                        <img
+                          src={url}
+                          alt={`pending-${idx + 1}`}
+                          loading="lazy"
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="p-2 flex items-center justify-between gap-2">
+                        <div className="text-xs text-slate-600 truncate">{pendingFiles[idx]?.name || "photo"}</div>
+                        <button
+                          type="button"
+                          className="text-xs px-2 py-1 rounded-xl bg-white/70 border border-white/70"
+                          onClick={() => removePending(idx)}
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 text-xs text-muted">* 사진은 <b>저장</b>을 눌러야 반영됩니다.</div>
+              </>
+            )}
           </div>
         );
       })}

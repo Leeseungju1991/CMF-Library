@@ -157,7 +157,14 @@ function TrashCard(props: { it: CmfItem; onRestore: () => void; onDeleteForever:
           <div className="text-xs text-slate-500 shrink-0">{it.No || "-"}</div>
         </div>
 
-        {/* ✅ 요청한 필드들: comp/width/mount/cost/color 표시 (Filter 느낌의 작은 라인들) */}
+        <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
+          <Field label="comp" value={(it as any).comp} />
+          <Field label="width" value={(it as any).width} />
+          <Field label="mount" value={(it as any).mount} />
+          <Field label="cost" value={(it as any).cost} />
+          <Field label="color" value={(it as any).color} />
+        </div>
+
         <div className="mt-4 flex items-center gap-3 justify-between">
           <button type="button" onClick={onRestore} className="action-pill action-pill-primary w-1/2">
             복구

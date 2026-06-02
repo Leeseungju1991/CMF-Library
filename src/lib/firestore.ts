@@ -427,3 +427,74 @@ export async function getDbCountSeries(): Promise<SeriesPoint[]> {
   }
   return out;
 }
+
+/**
+ * ✅ 전체 항목 조회 — CSV 내보내기 / 전체텍스트 검색에 사용
+ * 기본 limit 10,000. 그 이상이 필요하면 페이지네이션을 고려해야 함.
+ */
+export async function listAllItems(max: number = 10000): Promise<CmfItem[]> {
+  const q = query(collection(db, "cmfItems"), orderBy(documentId()), limit(max));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+}
+
+/**
+ * ✅ 전체 활동 로그 조회 — Logs 페이지에 사용
+ */
+export async function listRecentLogs(max: number = 200): Promise<any[]> {
+  const q = query(collection(db, "cmfLogs"), orderBy("createdAt", "desc"), limit(max));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+}
+
+/**
+ * ✅ CSV 직렬화 — 자주 쓰이는 컬럼 우선, 누락 필드는 빈문자.
+ * Excel/한글환경 호환성을 위해 BOM 포함.
+ */
+const CSV_COLUMNS: (keyof CmfItem | string)[] = [
+  "id",
+  "무게",
+  "업체명",
+  "No",
+  "comp",
+  "width",
+  "mount",
+  "cost",
+  "color",
+  "colorCodes",
+  "조직",
+  "전화번호",
+  "장소",
+  "아카이빙",
+  "useStatus",
+  "useIn",
+  "gender",
+  "releaseYear",
+  "collectionName",
+  "sampleLocation",
+  "createdAt",
+  "updatedAt",
+];
+
+function csvCell(v: any): string {
+  if (v === null || v === undefined) return "";
+  if (Array.isArray(v)) return v.join("/");
+  if (typeof v === "object" && v.toDate) {
+    try {
+      return new Date(v.toDate()).toISOString();
+    } catch {
+      return "";
+    }
+  }
+  const s = String(v);
+  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+export function itemsToCsv(items: CmfItem[]): string {
+  const header = CSV_COLUMNS.join(",");
+  const rows = items.map((it) =>
+    CSV_COLUMNS.map((col) => csvCell((it as any)[col])).join(",")
+  );
+  return "﻿" + [header, ...rows].join("\r\n");
+}

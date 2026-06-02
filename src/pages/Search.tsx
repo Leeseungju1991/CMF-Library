@@ -31,6 +31,31 @@ function applySidebarFilters<T extends Record<string, any>>(
   );
 }
 
+const TEXT_SEARCH_FIELDS: (keyof CmfItem | string)[] = [
+  "업체명",
+  "No",
+  "comp",
+  "color",
+  "조직",
+  "장소",
+  "아카이빙",
+  "collectionName",
+  "sampleLocation",
+];
+
+function applyTextQuery<T extends Record<string, any>>(rows: T[], q: string): T[] {
+  const needle = q.trim().toLowerCase();
+  if (!needle) return rows;
+  return rows.filter((r) =>
+    TEXT_SEARCH_FIELDS.some((k) => {
+      const v = (r as any)[k];
+      if (v == null) return false;
+      if (Array.isArray(v)) return v.some((x) => String(x).toLowerCase().includes(needle));
+      return String(v).toLowerCase().includes(needle);
+    })
+  );
+}
+
 export default function SearchPage() {
   const [meta, setMeta] = useState<{ weights: string[]; comps: string[] } | null>(null);
   const [loadingMeta, setLoadingMeta] = useState(false);
@@ -38,6 +63,7 @@ export default function SearchPage() {
   const [무게, set무게] = useState("");
   const [comp, setComp] = useState("");
   const [color, setColor] = useState("");
+  const [textQuery, setTextQuery] = useState("");
 
   const [open, setOpen] = useState<Open>(null);
 
@@ -77,7 +103,7 @@ export default function SearchPage() {
 
     // 1) 이미 검색 결과가 있으면: 그 결과를 재필터링
     if (rawItems.length > 0) {
-      const filtered = applySidebarFilters(rawItems, fieldKeys, valueSelections);
+      const filtered = applyTextQuery(applySidebarFilters(rawItems, fieldKeys, valueSelections), textQuery);
       setItems(filtered);
       setPage(0);
       return;
@@ -93,14 +119,22 @@ export default function SearchPage() {
           color: color || undefined,
         });
         setRawItems(res);
-        const filtered = applySidebarFilters(res, fieldKeys, valueSelections);
+        const filtered = applyTextQuery(applySidebarFilters(res, fieldKeys, valueSelections), textQuery);
         setItems(filtered);
         setPage(0);
       } finally {
         setLoading(false);
       }
     })();
-  }, [applyVersion, rawItems, fieldKeys, valueSelections, 무게, comp, color]);
+  }, [applyVersion, rawItems, fieldKeys, valueSelections, 무게, comp, color, textQuery]);
+
+  // ✅ 텍스트 검색어가 바뀌면 현재 결과 안에서 즉시 재필터링
+  useEffect(() => {
+    if (rawItems.length === 0) return;
+    const filtered = applyTextQuery(applySidebarFilters(rawItems, fieldKeys, valueSelections), textQuery);
+    setItems(filtered);
+    setPage(0);
+  }, [textQuery]);
 
   const 무게Options = useMemo(() => meta?.weights ?? [], [meta]);
   const compOptions = useMemo(() => meta?.comps ?? [], [meta]);
@@ -126,7 +160,7 @@ export default function SearchPage() {
 
       setRawItems(res);
 
-      const filtered = applySidebarFilters(res, fieldKeys, valueSelections);
+      const filtered = applyTextQuery(applySidebarFilters(res, fieldKeys, valueSelections), textQuery);
       setItems(filtered);
       setPage(0);
       setOpen(null);
@@ -171,6 +205,16 @@ export default function SearchPage() {
     <div className="space-y-6">
       {/* 필터 */}
       <div className="glass-card p-5 sm:p-6 relative z-40">
+        <div className="mb-3">
+          <div className="text-xs text-muted mb-1">전체 검색</div>
+          <input
+            className="select"
+            type="search"
+            placeholder="업체명 · No · comp · color · 조직 · 장소 등 자유롭게 입력"
+            value={textQuery}
+            onChange={(e) => setTextQuery(e.target.value)}
+          />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <Dropdown
             label="무게"

@@ -14,6 +14,8 @@ const nav: NavItem[] = [
   { to: "/search", label: "검색 하기", icon: SearchIcon },
   { to: "/compare", label: "색상 비교", icon: CompareIcon },
   { to: "/add", label: "CMF 추가", icon: PlusIcon },
+  { to: "/logs", label: "활동 로그", icon: LogsIcon },
+  { to: "/export", label: "내보내기", icon: ExportIcon },
   { to: "/trash", label: "휴지통", icon: TrashIcon },
 ];
 
@@ -36,6 +38,8 @@ function usePageTitle() {
   if (pathname.startsWith("/trash")) return "휴지통";
   if (pathname.startsWith("/detail")) return "상세보기";
   if (pathname.startsWith("/filter")) return "검색 하기";
+  if (pathname.startsWith("/logs")) return "활동 로그";
+  if (pathname.startsWith("/export")) return "내보내기";
   return "대시보드";
 }
 
@@ -540,6 +544,23 @@ function TrashIcon({ className }: { className?: string }) {
       <path d="M3 6h18" />
       <path d="M8 6V4h8v2" />
       <path d="M19 6l-1 14H6L5 6" />
+    </svg>
+  );
+}
+function LogsIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M4 4h16v16H4z" />
+      <path d="M8 8h8M8 12h8M8 16h5" />
+    </svg>
+  );
+}
+function ExportIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M12 3v12" />
+      <path d="M7 8l5-5 5 5" />
+      <path d="M5 21h14" />
     </svg>
   );
 }

@@ -1,0 +1,68 @@
+rules_version = '2';
+
+// ---------------------------------------------------------------------------
+// SOOM CMF Library — Firestore Security Rules
+//
+// Context:
+//   This project is an INTERNAL admin-only fabric / CMF library used by the
+//   SOOM design team. Authentication today is a single shared credential
+//   ("soom/soom") persisted as a localStorage flag in the client app.
+//   There is NO Firebase Authentication wired up yet.
+//
+//   As a result these rules are intentionally permissive (read open; write
+//   open with a far-future sunset) so that the existing client keeps
+//   functioning. The product is deployed behind a private Firebase Hosting
+//   URL and is not advertised publicly.
+//
+// V2 follow-up (TODO):
+//   Migrate to Firebase Authentication (email/password or SSO), then tighten
+//   each rule below to `request.auth != null` and remove the time-based
+//   sunset escape hatch. Track in CHANGELOG / SECURITY.md.
+// ---------------------------------------------------------------------------
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: temporary open-write sunset.
+    // TODO(V2): remove once Firebase Auth is enforced.
+    function openWriteAllowed() {
+      return request.auth != null
+          || request.time < timestamp.date(2099, 1, 1);
+    }
+
+    // Catalog items — main fabric/CMF entries.
+    match /cmfItems/{itemId} {
+      allow read: if true;
+      allow write: if openWriteAllowed();
+    }
+
+    // Trash bin (soft-delete) for cmfItems.
+    match /cmfTrash/{itemId} {
+      allow read: if true;
+      allow write: if openWriteAllowed();
+    }
+
+    // Activity / audit log.
+    match /cmfLogs/{logId} {
+      allow read: if true;
+      allow write: if openWriteAllowed();
+    }
+
+    // Popular / pinned items.
+    match /cmfPopular/{docId} {
+      allow read: if true;
+      allow write: if openWriteAllowed();
+    }
+
+    // Library-wide metadata (counters, schema version, etc.).
+    match /cmfMeta/{docId} {
+      allow read: if true;
+      allow write: if openWriteAllowed();
+    }
+
+    // Default deny for any other collection we haven't whitelisted above.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import fixedSwatch from "../assets/fixed-swatch.png";
-import { listItemsByColorPage, logPopularItems } from "../lib/firestore";
+import Snackbar from "../components/Snackbar";
+import { getColorCount, listItemsByColorPage, logPopularItems, softDelete } from "../lib/firestore";
 import type { CmfItem } from "../lib/types";
 
 const FIXED_COLORS = [
@@ -55,6 +56,7 @@ export default function CompareSelectPage() {
   const [color, setColor] = useState("");
   const [items, setItems] = useState<CmfItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
 
   // 페이지네이션: afterId 스택
   const [afterStack, setAfterStack] = useState<(string | null)[]>([null]);
@@ -64,12 +66,16 @@ export default function CompareSelectPage() {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const selectedIds = useMemo(() => Object.keys(selected).filter((k) => selected[k]), [selected]);
 
+  const [snackOpen, setSnackOpen] = useState(false);
+  const [snackMsg, setSnackMsg] = useState("");
+
   useEffect(() => {
     // 색상 바뀌면 초기화
     setAfterStack([null]);
     setNextAfterId(null);
     setItems([]);
     setSelected({});
+    setTotalCount(null);
   }, [color]);
 
   async function loadPage(afterId: string | null) {
@@ -91,6 +97,12 @@ export default function CompareSelectPage() {
 
   async function doSearch() {
     await loadPage(null);
+    try {
+      const n = await getColorCount(color || undefined);
+      setTotalCount(n);
+    } catch {
+      setTotalCount(null);
+    }
   }
 
   async function goNext() {
@@ -117,28 +129,24 @@ export default function CompareSelectPage() {
     });
   }
 
-  function removeItemFromList(id: string) {
-    // ✅ "삭제"는 현재 화면 목록에서만 제거
-    setItems((prev) => prev.filter((x) => x.id !== id));
-    setSelected((prev) => {
-      if (!prev[id]) return prev;
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
-  }
-
   async function onDelete(id: string) {
     if (!confirm("삭제 후 휴지통으로 이동합니다. 계속할까요?")) return;
-    await softDelete(id);
-    const nextRaw = rawItems.filter((x) => x.id !== id);
-    setRawItems(nextRaw);
-    const nextItems = items.filter((x) => x.id !== id);
-    setItems(nextItems);
-    setPage((p) => {
-      const nextTotalPages = Math.max(1, Math.ceil(nextItems.length / PAGE_SIZE));
-      return Math.min(p, nextTotalPages - 1);
-    });
+    try {
+      await softDelete(id);
+      setItems((prev) => prev.filter((x) => x.id !== id));
+      setSelected((prev) => {
+        if (!prev[id]) return prev;
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+      setTotalCount((n) => (typeof n === "number" ? Math.max(0, n - 1) : n));
+      setSnackMsg("휴지통으로 이동했습니다.");
+      setSnackOpen(true);
+    } catch (e: any) {
+      setSnackMsg(e?.message || "삭제 중 오류가 발생했습니다.");
+      setSnackOpen(true);
+    }
   }
 
 
@@ -214,7 +222,11 @@ export default function CompareSelectPage() {
 
       {/* ✅ 카드 리스트 */}
       <div className="bg-white shadow-card rounded-xl p-5">
-        <div className="font-semibold mb-3">목록 ({items.length})</div>
+        <div className="font-semibold mb-3">
+          목록 ({items.length}
+          {typeof totalCount === "number" && totalCount > items.length ? ` / 전체 ${totalCount}` : ""}
+          )
+        </div>
 
         {items.length === 0 ? (
           <div className="py-10 text-center text-muted">색상을 선택하고 검색을 눌러주세요.</div>
@@ -308,8 +320,8 @@ export default function CompareSelectPage() {
                           transition
                           duration-200
                         "
-                        onClick={onDelete}
-                        title="현재 목록에서만 제거됩니다"
+                        onClick={() => onDelete(it.id)}
+                        title="휴지통으로 이동"
                       >
                         삭제
                       </button>
@@ -321,6 +333,8 @@ export default function CompareSelectPage() {
           </div>
         )}
       </div>
+
+      <Snackbar open={snackOpen} message={snackMsg} onClose={() => setSnackOpen(false)} />
     </div>
   );
 }

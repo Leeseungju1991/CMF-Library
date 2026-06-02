@@ -1,11 +1,21 @@
 export type UseStatus = "사용중" | "미사용";
-export type UseIn = "" | "THE GEM" | "IDEALIAN" | "NEOR" | "ICONIA";
+export type UseIn = "" | "THE GEM" | "IDEALIAN" | "NEOR" | "NEORm" | "ICONIA";
 export type Gender = "" | "남아" | "여아";
 
+/**
+ * Cloud Storage 에 업로드된 의상사진의 메타데이터.
+ * - url: 다운로드 URL
+ * - name: 원본 파일명
+ * - path: Storage 내부 경로 (삭제·재서명 용)
+ * - createdAt: 업로드 시각(ms)
+ */
 export type OutfitPhoto = {
-  photoUrl: string;
-  characterName: string;
-  itemLabel: string;
+  url: string;
+  name: string;
+  path: string;
+  createdAt: number;
+  characterName?: string;
+  itemLabel?: string;
 };
 
 export type CmfItem = {

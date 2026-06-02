@@ -3,3 +3,17 @@ dist
 .env
 .DS_Store
 serviceAccountKey.json
+
+# Build / tooling output
+.firebase/
+*.log
+coverage
+/functions/lib
+
+# Environment files (keep .env.example committed)
+.env.local
+.env.*.local
+
+# Service account & credentials (never commit secrets)
+serviceAccountKey*.json
+**/serviceAccount*.json

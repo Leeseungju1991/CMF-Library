@@ -1,0 +1,40 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "cmfItems",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "무게", "order": "ASCENDING" },
+        { "fieldPath": "comp", "order": "ASCENDING" },
+        { "fieldPath": "__name__", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "cmfItems",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "colorCodes", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "__name__", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "cmfItems",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "무게", "order": "ASCENDING" },
+        { "fieldPath": "comp", "order": "ASCENDING" },
+        { "fieldPath": "colorCodes", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "__name__", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "cmfLogs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "action", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

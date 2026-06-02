@@ -2,15 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import fixedSwatch from "../assets/fixed-swatch.png";
 import Snackbar from "../components/Snackbar";
-import { getFilterMeta, searchItems, softDelete } from "../lib/firestore";
+import { searchItems, softDelete } from "../lib/firestore";
 import { useSidebarFilters, type FilterKey } from "../lib/filterContext";
 import type { CmfItem } from "../lib/types";
-
-type Open = "무게" | "comp" | "color" | null;
-
-const FIXED_COLORS = [
-  "BE","BK","BL","BN","BRG","BV","CAM","CH","DB","Denim","DY","GD","GN","GY","IV","KH","LB","LG","LM","MT","NV","Neon","OLV","OR","ORG","PCH","PK","PU","PUR","RD","SB","SLV","VI","VT","WH","W-G","YE","YG","YL","YW","WN","BG"
-];
 
 // (사이드바 체크박스 옵션은 DB에서 미리 로드됨: filterContext)
 
@@ -35,15 +29,6 @@ function applySidebarFilters<T extends Record<string, any>>(
 
 
 export default function FilterPage() {
-  const [meta, setMeta] = useState<{ weights: string[]; comps: string[] } | null>(null);
-  const [loadingMeta, setLoadingMeta] = useState(false);
-
-  const [무게, set무게] = useState("");
-  const [comp, setComp] = useState("");
-  const [color, setColor] = useState("");
-
-  const [open, setOpen] = useState<Open>(null);
-
   const [rawItems, setRawItems] = useState<CmfItem[]>([]);
   const [items, setItems] = useState<CmfItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -58,19 +43,6 @@ export default function FilterPage() {
 
   const { fieldKeys, valueSelections, applyVersion } = useSidebarFilters();
   const didMountRef = useRef(false);
-
-  useEffect(() => {
-    (async () => {
-      setLoadingMeta(true);
-      try {
-        const m = await getFilterMeta();
-        setMeta(m);
-      } finally {
-        setLoadingMeta(false);
-      }
-    })();
-  }, []);
-
 
   // ✅ 사이드바에서 "적용"을 누르면(=applyVersion 변경) 현재 검색 결과를 재필터링
   useEffect(() => {
@@ -88,63 +60,24 @@ export default function FilterPage() {
       return;
     }
 
-    // 2) 아직 검색을 안 했는데 필터를 적용했다면:
-    //    현재 상단 필터(무게/comp/color) 조건으로 1회 검색을 실행해서 결과를 보여준다.
+    // 2) 아직 검색을 안 했는데 필터를 적용했다면: 사이드바 조건만으로 전체 조회
     (async () => {
       setLoading(true);
       try {
-        const res = await searchItems({
-          무게: 무게 || undefined,
-          comp: comp || undefined,
-          color: color || undefined,
-        });
+        const res = await searchItems({});
         setRawItems(res);
         const filtered = applySidebarFilters(res, fieldKeys, valueSelections);
         setItems(filtered);
         setPage(0);
+        if (filtered.length === 0) {
+          setSnackMsg("검색 결과가 없습니다.");
+          setSnackOpen(true);
+        }
       } finally {
         setLoading(false);
       }
     })();
-  }, [applyVersion, rawItems, fieldKeys, valueSelections, 무게, comp, color]);
-
-
-  const 무게Options = useMemo(() => meta?.weights ?? [], [meta]);
-  const compOptions = useMemo(() => meta?.comps ?? [], [meta]);
-  const colorOptions = FIXED_COLORS;
-
-  // 상위 필터 변경 시 하위 필터 초기화
-  useEffect(() => {
-    setComp("");
-    setColor("");
-  }, [무게]);
-  useEffect(() => {
-    setColor("");
-  }, [comp]);
-
-  async function doSearch() {
-    setLoading(true);
-    try {
-      const res = await searchItems({
-        무게: 무게 || undefined,
-        comp: comp || undefined,
-        color: color || undefined,
-      });
-      setRawItems(res);
-
-      const filtered = applySidebarFilters(res, fieldKeys, valueSelections);
-      setItems(filtered);
-      setPage(0);
-      setOpen(null);
-
-      if (res.length === 0) {
-        setSnackMsg("검색 결과가 없습니다.");
-        setSnackOpen(true);
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
+  }, [applyVersion, rawItems, fieldKeys, valueSelections]);
 
   const total = items.length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -155,15 +88,22 @@ export default function FilterPage() {
 
   async function onDelete(id: string) {
     if (!confirm("삭제 후 휴지통으로 이동합니다. 계속할까요?")) return;
-    await softDelete(id);
-    const nextRaw = rawItems.filter((x) => x.id !== id);
-    setRawItems(nextRaw);
-    const nextItems = items.filter((x) => x.id !== id);
-    setItems(nextItems);
-    setPage((p) => {
-      const nextTotalPages = Math.max(1, Math.ceil(nextItems.length / PAGE_SIZE));
-      return Math.min(p, nextTotalPages - 1);
-    });
+    try {
+      await softDelete(id);
+      const nextRaw = rawItems.filter((x) => x.id !== id);
+      setRawItems(nextRaw);
+      const nextItems = items.filter((x) => x.id !== id);
+      setItems(nextItems);
+      setPage((p) => {
+        const nextTotalPages = Math.max(1, Math.ceil(nextItems.length / PAGE_SIZE));
+        return Math.min(p, nextTotalPages - 1);
+      });
+      setSnackMsg("휴지통으로 이동했습니다.");
+      setSnackOpen(true);
+    } catch (e: any) {
+      setSnackMsg(e?.message || "삭제 중 오류가 발생했습니다.");
+      setSnackOpen(true);
+    }
   }
 
   return (
@@ -255,61 +195,3 @@ function ResultCard(props: { it: CmfItem; onDetail: () => void; onDelete: () => 
   );
 }
 
-function Dropdown(props: {
-  label: string;
-  value: string;
-  placeholder: string;
-  open: boolean;
-  onToggle: () => void;
-  options: string[];
-  onPick: (v: string) => void;
-  onClear: () => void;
-}) {
-  const { label, value, placeholder, open, onToggle, options, onPick, onClear } = props;
-
-  return (
-    <div className="relative">
-      <div className="text-xs text-muted mb-1">{label}</div>
-      <button
-        className="w-full select text-left flex items-center justify-between hover:bg-white/90 transition"
-        onClick={onToggle}
-        type="button"
-      >
-        <span className={value ? "text-slate-700" : "text-slate-400"}>{value || placeholder}</span>
-        <div className="flex items-center gap-2">
-          {value && (
-            <button
-              className="text-xs px-2 py-1 rounded-lg bg-white/60 hover:bg-white/90"
-              onClick={(e) => {
-                e.stopPropagation();
-                onClear();
-              }}
-              type="button"
-            >
-              ✕
-            </button>
-          )}
-          <span className="text-xs text-slate-400">▼</span>
-        </div>
-      </button>
-
-      {open && (
-        <div className="absolute z-50 mt-2 w-full glass-card p-1 max-h-56 overflow-auto">
-          {options.length === 0 ? (
-            <div className="px-3 py-2 text-xs text-muted">옵션이 없습니다.</div>
-          ) : (
-            options.map((o) => (
-              <div
-                key={o}
-                className="px-3 py-2 rounded-xl hover:bg-white/70 cursor-pointer"
-                onClick={() => onPick(o)}
-              >
-                {o}
-              </div>
-            ))
-          )}
-        </div>
-      )}
-    </div>
-  );
-}

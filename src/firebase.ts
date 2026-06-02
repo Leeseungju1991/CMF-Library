@@ -1,24 +1,30 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage"; // ✅ 추가
+import { getStorage } from "firebase/storage";
 
-// Firebase config (user provided)
+/**
+ * Firebase 웹 SDK 구성.
+ * - 우선순위: `import.meta.env.VITE_FIREBASE_*` → 레거시 하드코딩 기본값.
+ * - Firebase 웹 config 값은 공개 식별자이며 보안은 Firestore/Storage 규칙으로 처리한다.
+ *   (자세한 내용은 docs/SECURITY.md 참고)
+ */
+const env = (import.meta as any).env ?? {};
+
 const firebaseConfig = {
-  apiKey: "AIzaSyD0RipCKxAxvzWYcsI6GlUS2dtLmtU4MjU",
-  authDomain: "soom-fd5d3.firebaseapp.com",
-  projectId: "soom-fd5d3",
-  storageBucket: "soom-fd5d3.firebasestorage.app",
-  messagingSenderId: "559989538115",
-  appId: "1:559989538115:web:07f9a3183d2920759283f6",
-  measurementId: "G-9YSTNMM3X9",
+  apiKey: env.VITE_FIREBASE_API_KEY || "AIzaSyD0RipCKxAxvzWYcsI6GlUS2dtLmtU4MjU",
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || "soom-fd5d3.firebaseapp.com",
+  projectId: env.VITE_FIREBASE_PROJECT_ID || "soom-fd5d3",
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || "soom-fd5d3.firebasestorage.app",
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || "559989538115",
+  appId: env.VITE_FIREBASE_APP_ID || "1:559989538115:web:07f9a3183d2920759283f6",
+  measurementId: env.VITE_FIREBASE_MEASUREMENT_ID || "G-9YSTNMM3X9",
 };
 
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
-export const storage = getStorage(app); // ✅ 추가
+export const storage = getStorage(app);
 
-// Analytics (optional)
 export async function initAnalytics() {
   try {
     const ok = await isSupported();

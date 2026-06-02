@@ -1,0 +1,31 @@
+rules_version = '2';
+
+// ---------------------------------------------------------------------------
+// SOOM CMF Library — Cloud Storage Security Rules
+//
+// Context:
+//   Admins upload outfit/reference photos for each CMF item under the path
+//   `cmf/{itemId}/outfit/{file}`. Reads are open because the library is an
+//   internal viewer; writes are constrained to image uploads under 10 MB
+//   to prevent abuse if the bucket URL ever leaks.
+//
+// V2 follow-up (TODO):
+//   Once Firebase Auth is enabled, replace the open write rule with
+//   `request.auth != null` and consider per-admin write scoping.
+// ---------------------------------------------------------------------------
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Admin viewers should always be able to render images.
+    match /{allPaths=**} {
+      allow read: if true;
+    }
+
+    // Outfit photos for a given catalog item.
+    match /cmf/{itemId}/outfit/{file} {
+      allow write: if request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+  }
+}
