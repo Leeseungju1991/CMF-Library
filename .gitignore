@@ -17,3 +17,4 @@ coverage
 # Service account & credentials (never commit secrets)
 serviceAccountKey*.json
 **/serviceAccount*.json
+.gstack/
