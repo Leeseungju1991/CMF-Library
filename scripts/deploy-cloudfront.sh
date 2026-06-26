@@ -3,7 +3,7 @@
 # deploy-cloudfront.sh — CMF Library (Vite SPA) 를 S3 + CloudFront 로 배포.
 #
 # Firebase Hosting 과 병행하는 CloudFront 배포 경로.
-# 배포 대상: https://dusyeunk6zage.cloudfront.net
+# 배포 대상: https://d11zdg3ax3cxya.cloudfront.net
 #
 # 동작:
 #   1) (--build 시) npm ci && npm run build → dist/
@@ -76,5 +76,5 @@ INVAL=$(aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths 
 echo "  invalidation id: $INVAL"
 
 echo
-echo "==> Done — https://dusyeunk6zage.cloudfront.net"
+echo "==> Done — https://d11zdg3ax3cxya.cloudfront.net"
 echo "    (invalidation 완료까지 1-3 분)"

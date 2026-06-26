@@ -179,11 +179,13 @@ firebase deploy            # hosting + firestore.rules + storage.rules + indexes
 
 ### 6.1 배포 (S3 + CloudFront)
 
-Firebase 와 병행하는 CloudFront 배포 경로. 대상: https://dusyeunk6zage.cloudfront.net
+Firebase 와 병행하는 CloudFront 배포 경로. 대상: https://d11zdg3ax3cxya.cloudfront.net
+
+현재 배포: S3 `iconia-prod-cmf-169063643478` / CloudFront `E1X1CJV3JRKHAW`.
 
 ```bash
 # 운영자 셸 (AWS 자격증명 필요)
-S3_BUCKET=<버킷> CLOUDFRONT_DISTRIBUTION_ID=<배포ID> bash scripts/deploy-cloudfront.sh --build
+S3_BUCKET=iconia-prod-cmf-169063643478 CLOUDFRONT_DISTRIBUTION_ID=E1X1CJV3JRKHAW bash scripts/deploy-cloudfront.sh --build
 ```
 
 `scripts/deploy-cloudfront.sh`: `dist/` → S3 sync(해시 에셋 immutable) · `index.html` no-cache · CloudFront invalidation.

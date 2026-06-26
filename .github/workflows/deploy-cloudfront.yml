@@ -2,13 +2,13 @@
 # deploy-cloudfront.yml — CMF Library (Vite SPA) 를 S3 + CloudFront 로 배포.
 #
 # Firebase Hosting(firebase-hosting.yml) 과 병행하는 CloudFront 배포 경로.
-# 배포 대상: https://dusyeunk6zage.cloudfront.net
+# 배포 대상: https://d11zdg3ax3cxya.cloudfront.net
 #
 # 필요 repository VARIABLES:
 #   AWS_DEPLOY_ROLE_ARN          arn:aws:iam::<account>:role/<deploy-role>
 #   AWS_REGION                   ap-northeast-2
 #   S3_BUCKET                    CMF CloudFront 오리진 S3 버킷명
-#   CLOUDFRONT_DISTRIBUTION_ID   dusyeunk6zage 배포의 distribution id
+#   CLOUDFRONT_DISTRIBUTION_ID   d11zdg3ax3cxya 배포의 distribution id
 #
 # 필요 repository SECRETS (빌드 시 주입 — firebase-hosting.yml 과 동일):
 #   VITE_FIREBASE_API_KEY / VITE_FIREBASE_AUTH_DOMAIN / VITE_FIREBASE_PROJECT_ID /
