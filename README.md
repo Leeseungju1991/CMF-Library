@@ -177,6 +177,20 @@ firebase deploy            # hosting + firestore.rules + storage.rules + indexes
 또는 GitHub Actions: `main` 푸시 → `firebase-hosting.yml` 이 자동 빌드/배포.
 필요한 시크릿: `FIREBASE_SERVICE_ACCOUNT`, `FIREBASE_PROJECT_ID`, `VITE_FIREBASE_*`.
 
+### 6.1 배포 (S3 + CloudFront)
+
+Firebase 와 병행하는 CloudFront 배포 경로. 대상: https://dusyeunk6zage.cloudfront.net
+
+```bash
+# 운영자 셸 (AWS 자격증명 필요)
+S3_BUCKET=<버킷> CLOUDFRONT_DISTRIBUTION_ID=<배포ID> bash scripts/deploy-cloudfront.sh --build
+```
+
+`scripts/deploy-cloudfront.sh`: `dist/` → S3 sync(해시 에셋 immutable) · `index.html` no-cache · CloudFront invalidation.
+CI 자동화는 `.github/workflows/deploy-cloudfront.yml`(수동 dispatch, OIDC). repo Variables: `AWS_DEPLOY_ROLE_ARN`, `AWS_REGION`, `S3_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID`.
+
+> SPA 라우팅: CloudFront 배포의 Custom Error Response 에서 403/404 → `/index.html`(200) 매핑이 필요 (firebase `rewrites` 등가).
+
 ---
 
 ## 7. 디렉터리
