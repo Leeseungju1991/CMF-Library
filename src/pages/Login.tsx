@@ -78,7 +78,7 @@ export default function LoginPage() {
             Sign in
           </button>
 
-          <div className="text-xs text-slate-400 text-center">로그인: soom / soom</div>
+          <div className="text-xs text-slate-400 text-center">로그인: test / test (열람 전용)</div>
         </div>
       </div>
     </div>
