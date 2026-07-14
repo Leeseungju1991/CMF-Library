@@ -1,5 +1,7 @@
 # 숨코리아 CMF Library
 
+> **제작자 / Author — LEE SEUNG JU**
+
 내부 관리자용 CMF(Color · Material · Finish) 패브릭 자료 관리 도구.
 React + Vite + Firebase(Firestore · Cloud Storage · Hosting) 기반의 PWA 단일 페이지 앱.
 
