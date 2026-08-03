@@ -8,6 +8,24 @@ React + Vite + Firebase(Firestore · Cloud Storage · Hosting) 기반의 PWA 단
 - 로그인: **soom / soom**
 - 스와치 이미지: **고정 자산**(`src/assets/fixed-swatch.png`) 사용. DB `swatchUrl` 무시.
 
+## 🌐 라이브 데모 (GitHub Pages, 백엔드 없음)
+
+**https://leeseungju1991.github.io/cmf-library/**
+
+- 실제 Firebase 프로젝트 없이 **완전히 정적** 파일로 배포된 목(mock) 데이터 빌드입니다.
+- `VITE_DEMO_MODE=true` 로 빌드하면 Firestore/Storage/Auth 호출이 전부
+  `src/lib/demoStore.ts` (in-memory + `localStorage`) 로 대체됩니다 — 외부 네트워크 요청이 전혀 없습니다.
+- 시드 데이터: CMF 항목 24건(활성) + 6건(휴지통), 활동 로그 40여 건이 처음 진입 시 자동으로 채워집니다.
+- 추가/수정/삭제/복구는 브라우저 세션(`localStorage`) 동안 그대로 반영되지만, 저장소를 지우거나
+  다른 브라우저로 열면 시드 데이터로 초기화됩니다 — 데모이므로 의도된 동작입니다.
+- 화면 상단 보라색 배너("DEMO 모드…")로 실제 운영 시스템과 구분됩니다.
+- 이 데모는 **`main` 브랜치 푸시 시 자동 배포**됩니다 (`.github/workflows/gh-pages.yml`).
+  최초 1회, 저장소 **Settings → Pages → Build and deployment → Source** 를
+  **"GitHub Actions"** 로 설정해야 워크플로가 배포까지 완료됩니다.
+- **진짜(Firebase 연동) 버전을 배포하려면** 실제 Firebase 프로젝트가 필요합니다 —
+  `.env.example` 을 참고해 `.env`(또는 `.env.local`)를 채우고 `npm run build` + `firebase deploy`
+  (또는 `firebase-hosting.yml` 워크플로)를 사용하세요. 자세한 내용은 아래 "6. 배포" 참고.
+
 ---
 
 ## 1. 동작 구조 흐름
@@ -169,7 +187,7 @@ $env:GOOGLE_APPLICATION_CREDENTIALS="C:\path\serviceAccountKey.json"
 npm run import:csv -- "C:\path\숨코리아1.csv"
 ```
 
-## 6. 배포 (Firebase)
+## 6. 배포 (Firebase — 실제 백엔드 필요)
 
 ```bash
 npm run build
@@ -178,6 +196,25 @@ firebase deploy            # hosting + firestore.rules + storage.rules + indexes
 
 또는 GitHub Actions: `main` 푸시 → `firebase-hosting.yml` 이 자동 빌드/배포.
 필요한 시크릿: `FIREBASE_SERVICE_ACCOUNT`, `FIREBASE_PROJECT_ID`, `VITE_FIREBASE_*`.
+**이 경로는 실제 Firebase 프로젝트(Firestore/Storage/Hosting)가 있어야 동작합니다.**
+
+## 6-2. 배포 (GitHub Pages — 데모, 백엔드 불필요)
+
+Firebase 계정 없이도 목데이터로 동작하는 정적 데모를 배포할 수 있습니다.
+
+```bash
+npm run build:demo   # = VITE_DEMO_MODE=true GITHUB_PAGES=true vite build
+```
+
+- `dist/` 에 완전 정적 산출물이 생성되며, GitHub Pages 서브패스(`/cmf-library/`)에 맞춰
+  `vite.config.ts` 의 `base` 가 자동 설정됩니다.
+- 라우팅은 `HashRouter` 를 사용하므로(`src/main.tsx`) 서버 rewrite 설정 없이도
+  딥링크/새로고침이 모두 정상 동작합니다(`#/detail/xxx` 형태).
+- `.github/workflows/gh-pages.yml` 이 `main` 푸시 시 위 명령으로 빌드하고
+  `actions/upload-pages-artifact` + `actions/deploy-pages` 로 자동 배포합니다.
+  **최초 1회** 저장소 **Settings → Pages → Source** 를 **"GitHub Actions"** 로 바꿔야 합니다.
+- 데모 빌드에서는 PWA 서비스워커 등록을 건너뜁니다(서브패스 캐시 범위 이슈 회피 — 오프라인 캐시만
+  비활성화될 뿐 앱 자체는 정상 동작합니다).
 
 ---
 
@@ -185,8 +222,9 @@ firebase deploy            # hosting + firestore.rules + storage.rules + indexes
 
 ```
 src/
-  components/   Layout, RequireAuth, Snackbar, Swatch, LineChart, ErrorBoundary
-  lib/          firebase, firestore, storage, auth, filterContext, pageCache, types
+  components/   Layout, RequireAuth, DemoBanner, Snackbar, Swatch, LineChart, ErrorBoundary
+  lib/          firebase, firestore, storage, auth, env, demoStore,
+                filterContext, pageCache, types
   pages/        Login, Dashboard, Search, Filter, Compare, CompareView,
                 Add, Detail, Trash, Logs, Export
   styles/       index.css (Tailwind + glass utilities + print rules)
@@ -194,5 +232,9 @@ scripts/        import_csv_to_firestore.mjs
 public/         sw.js, manifest.webmanifest, icons/*
 docs/           SECURITY.md
 firestore.rules · storage.rules · firestore.indexes.json · firebase.json
-.github/workflows/ ci.yml · firebase-hosting.yml
+.github/workflows/ ci.yml · firebase-hosting.yml · gh-pages.yml
 ```
+
+`src/lib/env.ts` / `src/lib/demoStore.ts` 는 GitHub Pages 데모 빌드(`VITE_DEMO_MODE=true`)
+전용 모듈입니다 — `firestore.ts`/`storage.ts`/`firebase.ts`/`RequireAuth.tsx` 가 이 플래그를
+확인해 실제 Firebase 호출 대신 목데이터 스토어로 위임합니다.

@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import DemoBanner from "./components/DemoBanner";
 import Layout from "./components/Layout";
 import RequireAuth from "./components/RequireAuth";
 import LoginPage from "./pages/Login";
@@ -22,6 +23,7 @@ function RouteFallback() {
 export default function App() {
   return (
     <Suspense fallback={<RouteFallback />}>
+      <DemoBanner />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
 
