@@ -5,7 +5,9 @@ export function isAuthed() {
 }
 
 export function login(id: string, pw: string) {
-  if (id === "soom" && pw === "soom") {
+  // "test" / "test" is kept as an alias so the credentials printed on the
+  // portfolio/resume (test/test) keep working alongside the original soom/soom.
+  if ((id === "soom" && pw === "soom") || (id === "test" && pw === "test")) {
     localStorage.setItem(KEY, "true");
     return true;
   }
