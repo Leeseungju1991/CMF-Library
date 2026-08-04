@@ -17,7 +17,16 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { DEMO_MODE } from "./env";
+import * as demo from "./demoStore";
 import type { CmfItem } from "./types";
+
+/**
+ * ✅ 데모 모드(VITE_DEMO_MODE=true): 아래 모든 export 는 실제 Firestore 대신
+ *    `./demoStore` (in-memory + localStorage 목데이터)로 위임한다.
+ *    real Firestore 코드 경로는 DEMO_MODE=false 일 때만 실행되며, 그때만 `db`
+ *    (`../firebase` 에서 실제로 초기화됨)가 사용된다.
+ */
 
 
 function normalizeColorCodes(color: any): string[] {
@@ -30,6 +39,7 @@ function normalizeColorCodes(color: any): string[] {
 
 /** ✅ 필터 옵션(메타) 1회 읽기: cmfMeta/filters */
 export async function getFilterMeta(): Promise<{ weights: string[]; comps: string[] } | null> {
+  if (DEMO_MODE) return demo.demoGetFilterMeta();
   const snap = await getDoc(doc(db, "cmfMeta", "filters"));
   if (!snap.exists()) return null;
   const data: any = snap.data();
@@ -64,6 +74,8 @@ export async function getSidebarFilterOptions(): Promise<{
   cost: string[];
   color: string[];
 }> {
+  if (DEMO_MODE) return demo.demoGetSidebarFilterOptions();
+
   // 1) meta 우선
   const metaSnap = await getDoc(doc(db, "cmfMeta", "filters"));
   if (metaSnap.exists()) {
@@ -127,6 +139,8 @@ function stripUndefined<T extends Record<string, any>>(obj: T): Partial<T> {
 
 /** 검색 (무게 -> comp -> color) */
 export async function searchItems(filters: { 무게?: string; comp?: string; color?: string }): Promise<CmfItem[]> {
+  if (DEMO_MODE) return demo.demoSearchItems(filters);
+
   const conds: any[] = [];
   if (filters.무게) conds.push(where("무게", "==", filters.무게));
   if (filters.comp) conds.push(where("comp", "==", filters.comp));
@@ -151,6 +165,8 @@ export async function listItemsByColorPage(args: {
   pageSize?: number;
   afterId?: string | null;
 }): Promise<{ items: CmfItem[]; nextAfterId: string | null }> {
+  if (DEMO_MODE) return demo.demoListItemsByColorPage(args);
+
   const pageSize = args.pageSize ?? 20;
 
   const conds: any[] = [];
@@ -168,18 +184,22 @@ export async function listItemsByColorPage(args: {
 
 /** ✅ 색상 비교: 특정 color(=colorCodes array-contains) 전체 개수 */
 export async function getColorCount(color?: string): Promise<number> {
+  if (DEMO_MODE) return demo.demoGetColorCount(color);
   if (!color) return await getTotalCount();
   const agg = await getCountFromServer(query(collection(db, "cmfItems"), where("colorCodes", "array-contains", color)));
   return agg.data().count;
 }
 
 export async function getItem(id: string): Promise<CmfItem | null> {
+  if (DEMO_MODE) return demo.demoGetItem(id);
   const snap = await getDoc(doc(db, "cmfItems", id));
   if (!snap.exists()) return null;
   return { id: snap.id, ...(snap.data() as any) };
 }
 
 export async function addItem(data: Partial<CmfItem>) {
+  if (DEMO_MODE) return demo.demoAddItem(data);
+
   const ref = await addDoc(
     collection(db, "cmfItems"),
     stripUndefined({
@@ -194,6 +214,8 @@ export async function addItem(data: Partial<CmfItem>) {
 }
 
 export async function updateItem(id: string, data: Partial<CmfItem>) {
+  if (DEMO_MODE) return demo.demoUpdateItem(id, data);
+
   await updateDoc(
     doc(db, "cmfItems", id),
     stripUndefined({
@@ -206,6 +228,8 @@ export async function updateItem(id: string, data: Partial<CmfItem>) {
 }
 
 export async function softDelete(id: string) {
+  if (DEMO_MODE) return demo.demoSoftDelete(id);
+
   const item = await getItem(id);
   if (!item) return;
 
@@ -223,6 +247,8 @@ export async function softDelete(id: string) {
 }
 
 export async function listTrash(): Promise<any[]> {
+  if (DEMO_MODE) return demo.demoListTrash();
+
   const snap = await getDocs(collection(db, "cmfTrash"));
   // NOTE:
   //  - softDelete 시 trash 문서에 원본 item을 그대로 저장하는데,
@@ -237,6 +263,8 @@ export async function listTrash(): Promise<any[]> {
 }
 
 export async function restoreFromTrash(trashDocId: string) {
+  if (DEMO_MODE) return demo.demoRestoreFromTrash(trashDocId);
+
   const snap = await getDoc(doc(db, "cmfTrash", trashDocId));
   if (!snap.exists()) return;
 
@@ -271,10 +299,12 @@ export async function restoreFromTrash(trashDocId: string) {
 }
 
 export async function deleteTrashPermanently(trashDocId: string) {
+  if (DEMO_MODE) return demo.demoDeleteTrashPermanently(trashDocId);
   await deleteDoc(doc(db, "cmfTrash", trashDocId));
 }
 
 export async function getTotalCount() {
+  if (DEMO_MODE) return demo.demoGetTotalCount();
   // 기존 구현은 deleted==false 필터가 걸려 있었는데,
   // 현재 앱 로직은 삭제 시 cmfTrash 로 이동 후 cmfItems 에서 문서를 삭제합니다.
   // 따라서 대부분의 문서에 deleted 필드가 존재하지 않아 카운트가 0으로 보이는 문제가 있었습니다.
@@ -283,6 +313,7 @@ export async function getTotalCount() {
 }
 
 export async function getLastUpdatedDate(): Promise<Date | null> {
+  if (DEMO_MODE) return demo.demoGetLastUpdatedDate();
   const q = query(collection(db, "cmfItems"), orderBy("updatedAt", "desc"), limit(1));
   const snap = await getDocs(q);
   if (snap.empty) return null;
@@ -291,6 +322,7 @@ export async function getLastUpdatedDate(): Promise<Date | null> {
 }
 
 export async function addLog(action: string, targetId: string, payload: any) {
+  if (DEMO_MODE) return demo.demoAddLog(action, targetId, payload);
   await addDoc(collection(db, "cmfLogs"), {
     action,
     targetId,
@@ -300,6 +332,7 @@ export async function addLog(action: string, targetId: string, payload: any) {
 }
 
 export async function listLogs() {
+  if (DEMO_MODE) return demo.demoListLogs();
   const q = query(collection(db, "cmfLogs"), orderBy("createdAt", "desc"), limit(50));
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
@@ -307,6 +340,7 @@ export async function listLogs() {
 
 /** ✅ 대시보드: 수정(UPDATE) 기록 건수 */
 export async function getUpdateLogCount(): Promise<number> {
+  if (DEMO_MODE) return demo.demoGetUpdateLogCount();
   const agg = await getCountFromServer(query(collection(db, "cmfLogs"), where("action", "==", "UPDATE")));
   return agg.data().count;
 }
@@ -316,6 +350,7 @@ export async function getUpdateLogCount(): Promise<number> {
  * - 대시보드 Top5 표기에 필요한 정보만 저장
  */
 export async function logPopularItems(items: CmfItem[]) {
+  if (DEMO_MODE) return demo.demoLogPopularItems(items);
   const col = collection(db, "cmfPopular");
   await Promise.all(
     items.map((it) =>
@@ -334,6 +369,7 @@ export async function logPopularItems(items: CmfItem[]) {
 export async function getTopSearches(): Promise<
   { itemId: string; 업체명: string; 무게: string; width: string; count: number }[]
 > {
+  if (DEMO_MODE) return demo.demoGetTopSearches();
   const q = query(collection(db, "cmfPopular"), orderBy("createdAt", "desc"), limit(100));
   const snap = await getDocs(q);
 
@@ -368,6 +404,7 @@ export async function getTopSearches(): Promise<
 
 /** ✅ 대시보드: 최근 추가된 DB 5개 */
 export async function getRecentAddedItems(): Promise<CmfItem[]> {
+  if (DEMO_MODE) return demo.demoGetRecentAddedItems();
   const q = query(collection(db, "cmfItems"), orderBy("createdAt", "desc"), limit(5));
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
@@ -386,6 +423,7 @@ function dateKeyLocal(d: Date) {
 
 /** 대시보드 그래프: 수정기록(UPDATE) 일별 집계 (최근 14일) */
 export async function getUpdateLogSeries(): Promise<SeriesPoint[]> {
+  if (DEMO_MODE) return demo.demoGetUpdateLogSeries();
   // NOTE: where(action==...) + orderBy(createdAt) 조합은 Firestore에서
   // 복합 인덱스를 요구할 수 있습니다. (환경에 따라 그래프만 비는 이슈)
   // 인덱스 없이 동작하도록 최근 로그를 가져온 뒤, 클라이언트에서 action==UPDATE만 필터링합니다.
@@ -415,6 +453,7 @@ export async function getUpdateLogSeries(): Promise<SeriesPoint[]> {
 
 /** 대시보드 그래프: DB 개수 (최근 14일 - 현재 값 기준 표시) */
 export async function getDbCountSeries(): Promise<SeriesPoint[]> {
+  if (DEMO_MODE) return demo.demoGetDbCountSeries();
   const total = await getTotalCount();
   const out: SeriesPoint[] = [];
   const today = new Date();
@@ -433,6 +472,7 @@ export async function getDbCountSeries(): Promise<SeriesPoint[]> {
  * 기본 limit 10,000. 그 이상이 필요하면 페이지네이션을 고려해야 함.
  */
 export async function listAllItems(max: number = 10000): Promise<CmfItem[]> {
+  if (DEMO_MODE) return demo.demoListAllItems(max);
   const q = query(collection(db, "cmfItems"), orderBy(documentId()), limit(max));
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
@@ -442,6 +482,7 @@ export async function listAllItems(max: number = 10000): Promise<CmfItem[]> {
  * ✅ 전체 활동 로그 조회 — Logs 페이지에 사용
  */
 export async function listRecentLogs(max: number = 200): Promise<any[]> {
+  if (DEMO_MODE) return demo.demoListRecentLogs(max);
   const q = query(collection(db, "cmfLogs"), orderBy("createdAt", "desc"), limit(max));
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
