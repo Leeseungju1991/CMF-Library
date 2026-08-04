@@ -8,23 +8,24 @@ React + Vite + Firebase(Firestore · Cloud Storage · Hosting) 기반의 PWA 단
 - 로그인: **soom / soom**
 - 스와치 이미지: **고정 자산**(`src/assets/fixed-swatch.png`) 사용. DB `swatchUrl` 무시.
 
-## 🌐 라이브 데모 (GitHub Pages, 백엔드 없음)
+## 🌐 라이브 사이트 (GitHub Pages, 실제 Firebase 프로젝트 연동)
 
 **https://leeseungju1991.github.io/cmf-library/**
 
-- 실제 Firebase 프로젝트 없이 **완전히 정적** 파일로 배포된 목(mock) 데이터 빌드입니다.
-- `VITE_DEMO_MODE=true` 로 빌드하면 Firestore/Storage/Auth 호출이 전부
-  `src/lib/demoStore.ts` (in-memory + `localStorage`) 로 대체됩니다 — 외부 네트워크 요청이 전혀 없습니다.
-- 시드 데이터: CMF 항목 24건(활성) + 6건(휴지통), 활동 로그 40여 건이 처음 진입 시 자동으로 채워집니다.
-- 추가/수정/삭제/복구는 브라우저 세션(`localStorage`) 동안 그대로 반영되지만, 저장소를 지우거나
-  다른 브라우저로 열면 시드 데이터로 초기화됩니다 — 데모이므로 의도된 동작입니다.
-- 화면 상단 보라색 배너("DEMO 모드…")로 실제 운영 시스템과 구분됩니다.
-- 이 데모는 **`main` 브랜치 푸시 시 자동 배포**됩니다 (`.github/workflows/gh-pages.yml`).
+- 실제 Firebase 프로젝트(`soom-fd5d3`) 의 Firestore/Storage 에 연결된 **진짜 동작** 빌드입니다
+  (`npm run build:pages` = `GITHUB_PAGES=true vite build`, `VITE_DEMO_MODE` 미설정).
+  Firebase 설정값은 `src/firebase.ts` 의 기본값(공개 식별자, env override 가능)에 있습니다.
+- 로그인은 여전히 로컬 하드코딩 체크(**soom/soom** 또는 **test/test**)이며 Firebase Auth 는
+  사용하지 않습니다 — `firestore.rules`/`storage.rules` 가 이를 반영해 인증 없이 읽기/쓰기를
+  허용하도록 이미 구성되어 있습니다. **Firebase 콘솔 → Firestore/Storage → Rules 탭에 이 저장소의
+  `firestore.rules`/`storage.rules` 내용을 그대로 붙여넣고 Publish 해야** 신규 항목 생성이 열립니다
+  (콘솔에서 DB를 새로 만들면 기본값이 잠겨있거나 30일 후 만료되는 테스트 모드이기 때문).
+- 이 사이트는 **`main` 브랜치 푸시 시 자동 배포**됩니다 (`.github/workflows/gh-pages.yml`).
   최초 1회, 저장소 **Settings → Pages → Build and deployment → Source** 를
   **"GitHub Actions"** 로 설정해야 워크플로가 배포까지 완료됩니다.
-- **진짜(Firebase 연동) 버전을 배포하려면** 실제 Firebase 프로젝트가 필요합니다 —
-  `.env.example` 을 참고해 `.env`(또는 `.env.local`)를 채우고 `npm run build` + `firebase deploy`
-  (또는 `firebase-hosting.yml` 워크플로)를 사용하세요. 자세한 내용은 아래 "6. 배포" 참고.
+- **백엔드 없는 목(mock) 데모 빌드**도 여전히 가능합니다 — `npm run build:demo`
+  (`VITE_DEMO_MODE=true`)를 쓰면 Firestore/Storage 호출이 전부 `src/lib/demoStore.ts`
+  (in-memory + `localStorage`) 로 대체되어 외부 네트워크 요청 없이 동작합니다.
 
 ---
 
