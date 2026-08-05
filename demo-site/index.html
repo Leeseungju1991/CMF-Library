@@ -12,26 +12,35 @@
 </head>
 <body>
 
-<!-- ============ LOGIN ============ -->
+<!-- ============ LOGIN (split showcase) ============ -->
 <section class="login-screen" id="login-screen">
-  <div class="login-card">
-    <div class="demo-badge">● DEMO ENVIRONMENT · 더미 데이터</div>
-    <div class="login-logo">C</div>
-    <h1 class="login-title">CMF Library</h1>
-    <p class="login-sub">원단 소재 라이브러리 · 검색/비교 (PWA)</p>
-    <form id="login-form">
-      <div class="field">
-        <label for="u">아이디</label>
-        <input id="u" type="text" autocomplete="username" placeholder="test" />
-      </div>
-      <div class="field">
-        <label for="p">비밀번호</label>
-        <input id="p" type="password" autocomplete="current-password" placeholder="test" />
-      </div>
-      <button type="submit" class="login-btn">로그인</button>
-      <div class="login-error" id="login-error"></div>
-    </form>
-    <div class="login-hint">체험 계정 &nbsp;<b>test</b> / <b>test</b>&nbsp; 로 로그인해 보세요.</div>
+  <div class="login-showcase">
+    <div class="showcase-badge">CMF LIBRARY</div>
+    <h2 class="showcase-title">색상 · 소재 · 마감<br/>데이터를 한 곳에서</h2>
+    <p class="showcase-sub">검색부터 색상 비교까지 — 원단 라이브러리를 위한 사내 PWA</p>
+    <div class="showcase-swatches" id="showcase-swatches"></div>
+    <div class="showcase-foot">Color · Material · Finish Archive</div>
+  </div>
+  <div class="login-panel">
+    <div class="login-card">
+      <div class="demo-badge">● DEMO ENVIRONMENT · 더미 데이터</div>
+      <div class="login-logo">C</div>
+      <h1 class="login-title">CMF Library</h1>
+      <p class="login-sub">원단 소재 라이브러리 · 검색/비교 (PWA)</p>
+      <form id="login-form">
+        <div class="field">
+          <label for="u">아이디</label>
+          <input id="u" type="text" autocomplete="username" placeholder="test" />
+        </div>
+        <div class="field">
+          <label for="p">비밀번호</label>
+          <input id="p" type="password" autocomplete="current-password" placeholder="test" />
+        </div>
+        <button type="submit" class="login-btn">로그인</button>
+        <div class="login-error" id="login-error"></div>
+      </form>
+      <div class="login-hint">체험 계정 &nbsp;<b>test</b> / <b>test</b>&nbsp; 로 로그인해 보세요.</div>
+    </div>
   </div>
 </section>
 
@@ -70,7 +79,7 @@
           <p class="page-sub">색상·소재·마감(CMF) 자료 현황을 한눈에 확인하세요 (더미 데이터)</p>
         </div>
         <div class="kpi-grid" id="kpi-grid"></div>
-        <div class="grid-2">
+        <div class="grid-3">
           <div class="panel">
             <div class="panel-head"><span class="panel-title">자주 조회되는 항목 Top 5</span></div>
             <table><tbody id="top-searches"></tbody></table>
@@ -78,6 +87,13 @@
           <div class="panel">
             <div class="panel-head"><span class="panel-title">최근 추가된 자료</span></div>
             <table><tbody id="recent-added"></tbody></table>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">색상 분포</span></div>
+            <div class="donut-wrap">
+              <div class="donut" id="color-donut"><div class="donut-hole"><span id="donut-total"></span><small>건</small></div></div>
+              <div class="donut-legend" id="color-donut-legend"></div>
+            </div>
           </div>
         </div>
       </section>

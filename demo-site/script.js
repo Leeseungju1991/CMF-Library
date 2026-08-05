@@ -46,7 +46,32 @@ function renderDashboard() {
   const recent = [...items].sort((a,b) => b.date.localeCompare(a.date)).slice(0,5);
   document.getElementById('recent-added').innerHTML = recent.map(it => `
     <tr><td class="strong">${it.vendor}</td><td>${it.weight} · ${it.width}</td></tr>`).join('');
+  renderColorDonut();
 }
+
+function renderColorDonut() {
+  const counts = {};
+  items.forEach(it => { counts[it.color] = (counts[it.color] || 0) + 1; });
+  const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const total = items.length;
+  let acc = 0;
+  const stops = entries.map(([color, count]) => {
+    const start = (acc / total) * 360; acc += count; const end = (acc / total) * 360;
+    return `${colorHex[color] || '#888'} ${start}deg ${end}deg`;
+  }).join(', ');
+  document.getElementById('color-donut').style.background = `conic-gradient(${stops})`;
+  document.getElementById('donut-total').textContent = total;
+  document.getElementById('color-donut-legend').innerHTML = entries.map(([color, count]) => `
+    <div class="legend-row"><span class="legend-dot" style="background:${colorHex[color] || '#888'}"></span>${color}<b>${count}</b></div>`).join('');
+}
+
+function renderShowcaseSwatches() {
+  const el = document.getElementById('showcase-swatches');
+  if (!el) return;
+  const colors = Object.values(colorHex);
+  el.innerHTML = [...colors, ...colors].slice(0, 14).map(c => `<span style="background:${c}"></span>`).join('');
+}
+renderShowcaseSwatches();
 
 function renderSearch(filterText = '', colorFilter = '') {
   const q = filterText.trim().toLowerCase();
