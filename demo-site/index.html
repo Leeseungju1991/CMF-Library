@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>CMF Library | 원단 소재 라이브러리 · DEMO</title>
-<meta name="description" content="색상·소재·마감(CMF) 원단 라이브러리 데모 — React·Vite·Firebase 기반 사내 PWA" />
+<title>CMF Library | 인형원단 소재 라이브러리 · DEMO</title>
+<meta name="description" content="색상·소재·마감(CMF) 인형원단(플러시·밍크·극세모) 라이브러리 데모 — React·Vite·Firebase 기반 사내 PWA" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
@@ -15,9 +15,9 @@
 <!-- ============ LOGIN (split showcase) ============ -->
 <section class="login-screen" id="login-screen">
   <div class="login-showcase">
-    <div class="showcase-badge">CMF LIBRARY</div>
-    <h2 class="showcase-title">색상 · 소재 · 마감<br/>데이터를 한 곳에서</h2>
-    <p class="showcase-sub">검색부터 색상 비교까지 — 원단 라이브러리를 위한 사내 PWA</p>
+    <div class="showcase-badge">CMF LIBRARY · 인형원단</div>
+    <h2 class="showcase-title">플러시 · 밍크 · 극세모<br/>인형원단 데이터를 한 곳에서</h2>
+    <p class="showcase-sub">봉제인형 제작에 쓰이는 원단의 색상·촉감·파일 길이까지 — 인형원단 라이브러리를 위한 사내 PWA</p>
     <div class="showcase-swatches" id="showcase-swatches"></div>
     <div class="showcase-foot">Color · Material · Finish Archive</div>
   </div>
@@ -26,7 +26,7 @@
       <div class="demo-badge">● DEMO ENVIRONMENT · 더미 데이터</div>
       <div class="login-logo">C</div>
       <h1 class="login-title">CMF Library</h1>
-      <p class="login-sub">원단 소재 라이브러리 · 검색/비교 (PWA)</p>
+      <p class="login-sub">인형원단 소재 라이브러리 · 검색/비교 (PWA)</p>
       <form id="login-form">
         <div class="field">
           <label for="u">아이디</label>
@@ -76,7 +76,7 @@
       <section class="page is-active" id="page-dashboard">
         <div class="page-head">
           <h2 class="page-title">라이브러리 현황</h2>
-          <p class="page-sub">색상·소재·마감(CMF) 자료 현황을 한눈에 확인하세요 (더미 데이터)</p>
+          <p class="page-sub">인형원단(플러시·밍크·극세모) 색상·소재·마감(CMF) 자료 현황을 한눈에 확인하세요 (더미 데이터)</p>
         </div>
         <div class="kpi-grid" id="kpi-grid"></div>
         <div class="grid-3">
@@ -100,9 +100,9 @@
 
       <!-- SEARCH -->
       <section class="page" id="page-search">
-        <div class="page-head"><h2 class="page-title">검색 / 필터</h2><p class="page-sub">무게 · 업체명 · 소재(comp) · 색상으로 검색</p></div>
+        <div class="page-head"><h2 class="page-title">검색 / 필터</h2><p class="page-sub">무게 · 업체명 · 소재(comp) · 적용 인형 · 색상으로 검색</p></div>
         <div class="searchbar">
-          <input id="cmf-search" placeholder="업체명 또는 소재로 검색" />
+          <input id="cmf-search" placeholder="업체명, 소재 또는 적용 인형으로 검색" />
           <select id="cmf-color-filter"><option value="">전체 색상</option></select>
         </div>
         <div class="swatch-grid" id="swatch-grid"></div>
@@ -110,10 +110,10 @@
 
       <!-- COMPARE -->
       <section class="page" id="page-compare">
-        <div class="page-head"><h2 class="page-title">색상 비교</h2><p class="page-sub">동일 색상 코드 기준 원단 비교</p></div>
+        <div class="page-head"><h2 class="page-title">색상 비교</h2><p class="page-sub">동일 색상 코드 기준 인형원단 비교 (행 클릭 시 상세 보기)</p></div>
         <div class="panel">
           <table>
-            <thead><tr><th>업체명</th><th>무게</th><th>소재(comp)</th><th>Width</th><th>단가</th><th>색상</th></tr></thead>
+            <thead><tr><th>업체명</th><th>무게</th><th>소재(comp)</th><th>적용 인형</th><th>파일 길이</th><th>단가</th><th>색상</th></tr></thead>
             <tbody id="compare-rows"></tbody>
           </table>
         </div>
@@ -124,10 +124,12 @@
         <div class="page-head"><h2 class="page-title">CMF 추가</h2><p class="page-sub">데모 환경에서는 저장되지 않습니다 (UI 미리보기)</p></div>
         <div class="panel" style="max-width:520px">
           <div class="field"><label>업체명</label><input placeholder="예: ㈜동양섬유" /></div>
-          <div class="field"><label>무게</label><input placeholder="예: 180g" /></div>
-          <div class="field"><label>소재 (comp)</label><input placeholder="예: Cotton 100%" /></div>
+          <div class="field"><label>무게</label><input placeholder="예: 320g" /></div>
+          <div class="field"><label>소재 (comp)</label><input placeholder="예: 극세사 플러시 100%" /></div>
+          <div class="field"><label>적용 인형</label><input placeholder="예: 대형 곰인형" /></div>
+          <div class="field"><label>파일 길이</label><input placeholder="예: 8mm" /></div>
           <div class="field"><label>색상</label><input placeholder="예: WH" /></div>
-          <button class="login-btn" style="max-width:160px" onclick="alert('데모 환경에서는 저장되지 않습니다.')">저장 →</button>
+          <button class="login-btn" style="max-width:160px" id="cmf-add-btn">저장 →</button>
         </div>
       </section>
 
@@ -158,6 +160,15 @@
         실제 소스코드는 <a href="https://github.com/Leeseungju1991/CMF-Library" target="_blank" style="color:var(--accent-2)">GitHub</a>에서 확인할 수 있습니다.
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ============ SNACKBAR / MODAL ============ -->
+<div class="snackbar-stack" id="snackbar-stack"></div>
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-box" id="modal-box" role="dialog" aria-modal="true">
+    <button class="modal-close" id="modal-close" aria-label="닫기">✕</button>
+    <div class="modal-body" id="modal-body"></div>
   </div>
 </div>
 
