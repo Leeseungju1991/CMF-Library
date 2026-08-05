@@ -37,38 +37,30 @@
 
 <!-- ============ APP ============ -->
 <div class="app" id="app">
-  <aside class="sidebar">
-    <div class="side-brand">
+  <header class="topnav">
+    <div class="topnav-brand">
       <div class="side-logo">C</div>
       <div class="side-brand-text">CMF Library<small>Color·Material·Finish</small></div>
     </div>
 
-    <div class="nav-group-label">개요</div>
-    <a class="nav-item is-active" data-page="dashboard"><span class="ic">▤</span>대시보드</a>
+    <nav class="topnav-links">
+      <a class="nav-item is-active" data-page="dashboard"><span class="ic">▤</span>대시보드</a>
+      <a class="nav-item" data-page="search"><span class="ic">🔍</span>검색 / 필터</a>
+      <a class="nav-item" data-page="compare"><span class="ic">◫</span>색상 비교</a>
+      <a class="nav-item" data-page="add"><span class="ic">+</span>CMF 추가</a>
+      <a class="nav-item" data-page="trash"><span class="ic">🗑</span>휴지통</a>
+      <a class="nav-item" data-page="logs"><span class="ic">≡</span>활동 로그</a>
+    </nav>
 
-    <div class="nav-group-label">라이브러리</div>
-    <a class="nav-item" data-page="search"><span class="ic">🔍</span>검색 / 필터</a>
-    <a class="nav-item" data-page="compare"><span class="ic">◫</span>색상 비교</a>
-    <a class="nav-item" data-page="add"><span class="ic">+</span>CMF 추가</a>
-    <a class="nav-item" data-page="trash"><span class="ic">🗑</span>휴지통</a>
-
-    <div class="nav-group-label">운영</div>
-    <a class="nav-item" data-page="logs"><span class="ic">≡</span>활동 로그</a>
-
-    <div class="side-foot">
+    <div class="topnav-right">
+      <span class="env-pill">DEMO · READ-ONLY-ISH</span>
+      <div class="topbar-user"><div class="avatar">T</div><span id="user-name">test</span></div>
+      <span class="hidden" id="topbar-title">대시보드</span>
       <button class="logout-btn" id="logout-btn">로그아웃</button>
     </div>
-  </aside>
+  </header>
 
   <div class="main">
-    <div class="topbar">
-      <div class="topbar-title" id="topbar-title">대시보드</div>
-      <div class="topbar-right">
-        <span class="env-pill">DEMO · READ-ONLY-ISH</span>
-        <div class="topbar-user"><div class="avatar">T</div><span id="user-name">test</span></div>
-      </div>
-    </div>
-
     <div class="content">
 
       <!-- DASHBOARD -->
